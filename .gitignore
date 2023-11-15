@@ -1,0 +1,9 @@
+
+# os related
+*.swp
+.DS_Store
+
+# virtual envs
+node_modules
+venv*
+*venv
