@@ -25,7 +25,7 @@ The alarm state shows the condition of the steam trap. If no bit is set high, th
 |  Bit[7]  | Defective alarm   | Steam loss detected                       |
 |          |                   |                                           |
 
-_For now the warnings and alarms have set same thresholds, so both flags (status bits) will be set HIGH or LOW at the same time (within the same payload uplink)._
+_Currently the warnings and alarms have been set to same thresholds except for the "Defective warning / alarm". So both flags (status bits) will be set HIGH or LOW at the same time (within the same payload uplink)._
 
 ### Error status flags - Byte[6]
 
@@ -58,9 +58,7 @@ Working modes are refering to the steam trap type / calibration type of the sens
 
 **All payload encodings are big-endian byteorder with LSB arangement (least significant bit first).**
 
-The scaling and offset is beeing applied as
-
-$fx = \frac{x - offset}{scale}$
+The scaling and offset is beeing applied as $fx = \frac{x - offset}{scale}$
 
 ### **bimetallic**, **membrane** / **capsule** and **ball float** steam traps
 
@@ -83,10 +81,10 @@ _Not available yet._
 
 Currently there is only the initial software release v1.0.0 available. An software release update is expected in the first quarter of 2024. See expected new features and improvements in ["Announcements" section](#new-software-release-120-expected-in-february-2024).
 
-| Software | Hardware    |
-| :------- | :---------- |
-| v1.0.0   | 1.0 \| 1.2  |
-| v1.2.0   | _undefined_ |
+| Software | Hardware   |
+| :------- | :--------- |
+| v1.0.0   | 1.0 \| 1.2 |
+| v1.2.0   | 1.0 \| 1.2 |
 
 ## Announcements
 
