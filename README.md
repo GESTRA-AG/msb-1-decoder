@@ -31,17 +31,17 @@ _Currently the warnings and alarms have been set to same thresholds except for t
 
 The error state shows the condition of the sensor equipment. If none Bit is set (except mode), the sensor is working fine.
 
-| Position | Phrase           | Description                                                   |
-| :------: | :--------------- | :------------------------------------------------------------ |
-|  Bit[0]  | TBD/RFU          | PT100 defective or preamplifier not connected (value < 0°C)   |
-|  Bit[1]  | PT100 max. error | PT100 defective or preamplifier not connected (value < 250°C) |
-|  Bit[2]  | Amb. temp. error | Ambient temperature out of range [-20°C, 50°C]                |
-|  Bit[3]  | Battery error    | Battery capacity < 9 % ($\approx$ 500 uplinks remaining)      |
-|  Bit[4]  | Battery warning  | Battery capacity < 46 % ($\approx$ 4500 uplinks remaining)    |
-|  Bit[5]  | Mode             | Bit[0] of working mode                                        |
-|  Bit[6]  | Mode             | Bit[1] of working mode                                        |
-|  Bit[7]  | Mode             | Bit[2] of working mode                                        |
-|          |                  |                                                               |
+| Position | Phrase           | Description                                                    |
+| :------: | :--------------- | :------------------------------------------------------------- |
+|  Bit[0]  | TBD/RFU          | PT100 defective or pre-amplifier not connected (value < 0°C)   |
+|  Bit[1]  | PT100 max. error | PT100 defective or pre-amplifier not connected (value < 250°C) |
+|  Bit[2]  | Amb. temp. error | Ambient temperature out of range [-20°C, 50°C]                 |
+|  Bit[3]  | Battery error    | Battery capacity < 9 % ($\approx$ 500 uplinks remaining)       |
+|  Bit[4]  | Battery warning  | Battery capacity < 46 % ($\approx$ 4500 uplinks remaining)     |
+|  Bit[5]  | Mode             | Bit[0] of working mode                                         |
+|  Bit[6]  | Mode             | Bit[1] of working mode                                         |
+|  Bit[7]  | Mode             | Bit[2] of working mode                                         |
+|          |                  |                                                                |
 
 Working modes are refering to the steam trap type / calibration type of the sensor.
 
@@ -72,6 +72,8 @@ The scaling and offset is beeing applied as $fx = \frac{x - offset}{scale}$
 | Range     |  0 - 100   |  0 - 100   |  0 - 100   |  0 - 250   | (-127) - 127 |      -      |      -      |  0 - 25.5  | 0 - 100 |    x    |    x     |
 | Unit      |     %      |     %      |     %      |     °C     |      °C      |      -      |      -      |    kg/h    |    %    |    x    |    x     |
 |           |            |            |            |            |              |             |             |            |         |         |          |
+
+_Fields filled with **X** are masked / censored._
 
 ### **thermo-dynamic** steam traps
 
