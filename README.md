@@ -60,9 +60,7 @@ Working modes are refering to the steam trap type / calibration type of the sens
 
 The scaling and offset is beeing applied as
 
-$
-fx = \frac{x - offset}{scale}
-$
+$fx = \frac{x - offset}{scale}$
 
 ### **bimetallic**, **membrane** / **capsule** and **ball float** steam traps
 
