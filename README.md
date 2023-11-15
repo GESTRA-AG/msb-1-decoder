@@ -59,6 +59,7 @@ Working modes are refering to the steam trap type / calibration type of the sens
 **All payload encodings are big-endian byteorder with LSB arangement (least significant bit first).**
 
 The scaling and offset is beeing applied as
+
 $
 fx = \frac{x - offset}{scale}
 $
