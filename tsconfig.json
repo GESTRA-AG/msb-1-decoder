@@ -6,6 +6,7 @@
     "outDir": "JavaScript",
     "rootDir": "TypeScript",
     "forceConsistentCasingInFileNames": true,
+    "isolatedModules": false,
     "strict": true
   },
   "exclude": ["node_modules"]

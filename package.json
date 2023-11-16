@@ -1,0 +1,10 @@
+{
+  "name": "msb-1-decoders",
+  "version": "1.0.0",
+  "description": "MSB-1 (Multisense Bolt 1) / Ecobolt-1 Decoders",
+  "main": "index.js",
+  "repository": "git@github.com:GESTRA-AG/msb-1-decoders.git",
+  "author": "Vadim Grebnev <vadim.grebnev@de.gestra.com>",
+  "license": "MIT",
+  "private": false
+}

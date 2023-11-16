@@ -23,6 +23,7 @@ interface DecodedUplink {
   index?: number;
   target?: string;
   data: { [key: string]: number };
+  statusPhrase?: string;
   info?: string;
   warning?: string;
   error?: string;
@@ -52,6 +53,8 @@ function decodeUplinkPayload(payload: number[], port: number): DecodedUplink {
           battery: dataView.getUint8(8),
           ststatus: getSteamTrapStatus(dataView.getUint16(5, false)),
         },
+        statusPhrase:
+          statusPhrases[getSteamTrapStatus(dataView.getUint16(5, false))],
       };
     }
     case 10: {
@@ -161,7 +164,7 @@ const statusPhrases = [
   "Device fault", // 7
   "Device fault", // 8
   "Device fault", // 9
-];
+] as const;
 
 const statusKeys = [
   "PT100MinError",

@@ -3,7 +3,7 @@
 This repository contains decoders for different popular IoT platforms:
 
 - LORIOT
-<!-- - The Things Network (TTN) / The Things Industries (TTI) -->
+- The Things Network (TTN) / The Things Industries (TTI)
 
 ## Payload structure
 

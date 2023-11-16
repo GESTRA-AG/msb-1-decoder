@@ -43,6 +43,8 @@ function decodeUplinkPayload(payload, port) {
           battery: dataView.getUint8(8),
           ststatus: getSteamTrapStatus(dataView.getUint16(5, false)),
         },
+        statusPhrase:
+          statusPhrases[getSteamTrapStatus(dataView.getUint16(5, false))],
       };
     }
     case 10: {
