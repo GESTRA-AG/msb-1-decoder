@@ -54,7 +54,7 @@ Working modes are refering to the steam trap type / calibration type of the sens
 |   4   | DK / TH   | Thermodynamic       |
 |       |           |                     |
 
-_DK / TH is not supported yet, see ["Announcements" section](#announcements))_
+_DK / TH is not supported yet, see ["Announcements" section](#announcements)_
 
 ### Data frames / payload uplinks
 
