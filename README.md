@@ -17,11 +17,11 @@ The alarm state shows the condition of the steam trap. If no bit is set high, th
 | :------: | :---------------- | :---------------------------------------- |
 |  Bit[0]  | TBD/RFU           | _To Be Defined / Reserved for future use_ |
 |  Bit[1]  | Cold warning      | Process / steam trap is not in operation  |
-|  Bit[2]  | BC warning        | Banking-ip of condensate                  |
+|  Bit[2]  | BC warning        | Banking-up of condensate                  |
 |  Bit[3]  | Defective warning | Steam loss detected                       |
 |  Bit[4]  | TBD/RFU           | _To Be Defined / Reserved for future use_ |
 |  Bit[5]  | Cold alarm        | Process / steam trap is not in operation  |
-|  Bit[6]  | BC alarm          | Banking-ip of condensate                  |
+|  Bit[6]  | BC alarm          | Banking-up of condensate                  |
 |  Bit[7]  | Defective alarm   | Steam loss detected                       |
 |          |                   |                                           |
 
@@ -54,6 +54,8 @@ Working modes are refering to the steam trap type / calibration type of the sens
 |   4   | DK / TH   | Thermodynamic       |
 |       |           |                     |
 
+_DK / TH is not supported yet, see ["Announcements" section](#announcements))_
+
 ### Data frames / payload uplinks
 
 **All payload encodings are big-endian byteorder with LSB arangement (least significant bit first).**
@@ -81,16 +83,16 @@ _Not available yet._
 
 ## Compability of hardware (amplifier) and software versions
 
-Currently there is only the initial software release v1.0.0 available. An software release update is expected in the first quarter of 2024. See expected new features and improvements in ["Announcements" section](#new-software-release-120-expected-in-february-2024).
+Currently there is only the initial software release v1.0.0 available. An software release update is expected in the first quarter of 2024. See expected new features and improvements in ["Announcements" section](#new-software-release-110-expected-in-february-2024).
 
 | Software | Hardware   |
 | :------- | :--------- |
 | v1.0.0   | 1.0 \| 1.2 |
-| v1.2.0   | 1.0 \| 1.2 |
+| v1.1.0   | 1.0 \| 1.2 |
 
 ## Announcements
 
-### New software release 1.2.0 expected in February 2024
+### New software release 1.1.0 expected in February 2024
 
 The software update will include
 

@@ -92,7 +92,7 @@ function decodeUplink(input: InputData): OutputData {
       }
     }
     case 139: {
-      warnings.push("Received software versio info uplink");
+      warnings.push("Received software version info uplink");
       data.MajorSWV = dataView.getUint8(1);
       data.MinorSWV = dataView.getUint8(0);
       data.PatchSWV = dataView.getUint8(2);
