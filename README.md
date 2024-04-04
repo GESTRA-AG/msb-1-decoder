@@ -1,49 +1,128 @@
-# Introduction - Multisense Bolt 1 / Ecobolt 1 Decoders
+# Multisense Bolt 1 / Ecobolt 1 Decoders
 
-This repository contains decoders for different popular IoT platforms:
+This repository contains payload decoder for _The Things Network (TTN)_ / _The Things Industries (TTI)_.  
+The official decoder format documentation can be reviewed at [thethingsindustries.com](https://www.thethingsindustries.com/docs/integrations/payload-formatters/javascript/uplink/).
 
-- LORIOT
-- The Things Network (TTN) / The Things Industries (TTI)
+## Get started
+
+Please adjust the **_Decoder Setup_** block at the beginning of the _decoder.js_ file before integration.
+
+```JavaScript
+// ! Start of Decoder Setup ----------------------------------------------------
+
+const trapType = "BK / BI - Bimetallic";
+const softwareVersion = "1.1.0";
+const subscription = "Bronze";
+const filterMaskedData = true;
+
+// ! End of Decoder Setup ------------------------------------------------------
+```
+
+Code 1: Default decoder setup
+
+The decoder needs to know the **trap type**, **software version** and **subscription** plan.
+
+- The trap type is used to determine whenever the steam trap is a _DK / TH - Thermodynamic_ steam trap with a slightly different [payload structure](#payload-structure) (Byte[8] tag is _'cycles'_ clicks counter instead of _'BAT'_ battery, see [data uplink](#data-uplink-on-lora-function-port-2) subsection below).
+- Devices received before 1st of April 2024 should have the software version 1.0.0. For software versions < 1.1.0 the subscription is _'None'_ and will therefore be ignored if set to something else.
+- Masked data will be filtered out by default, for more details see [subscriptions subsection](#subscriptions). If filtering is not desired, set the _filterMaskedData_ constant from _true_ to _false_.
 
 ## Payload structure
 
 This subsection shows the whole payload structure and differences between different hardware and software versions, as well as different working modes of the sensor.
 
+**All payload encodings are big-endian byteorder with LSB arangement (least significant bit first).**
+
+**The scaling and offset is beeing applied as** $fx = \frac{x - offset}{scale}$
+
+### Data uplink on LoRa function port 2
+
+_Fields filled with **X** are masked._
+
+| Position  |  Byte[0]   |  Byte[1]   |  Byte[2]   |  Byte[3]   |   Byte[4]    |   Byte[5]   |   Byte[6]   |  Byte[7]   | Byte[8] | Byte[9] | Byte[10] |
+| :-------- | :--------: | :--------: | :--------: | :--------: | :----------: | :---------: | :---------: | :--------: | :-----: | :-----: | :------: |
+| Tag       | Avg. noise | Min. noise | Max. noise | Avg. temp. |  Amb. temp.  | Alarm flags | Error flags | Steam loss | Battery |    X    |    X     |
+| Data type |   UInt8    |   UInt8    |   UInt8    |   UInt8    |     Int8     |    UInt8    |    UInt8    |   UInt8    |  UInt8  |    x    |    x     |
+| Bitmask   |     -      |     -      |     -      |     -      |      -       |      -      |      -      |     -      |    -    |    x    |    x     |
+| Scaling   |    2.55    |    2.55    |    2.55    |     1      |      1       |      -      |      -      |     1      |  2.54   |    x    |    x     |
+| Offset    |     0      |     0      |     0      |     0      |      0       |      -      |      -      |     0      |    0    |    x    |    x     |
+| Range     |  0 - 100   |  0 - 100   |  0 - 100   |  0 - 250   | (-127) - 127 |      -      |      -      |  0 - 25.5  | 0 - 100 |    x    |    x     |
+| Unit      |     %      |     %      |     %      |     °C     |      °C      |      -      |      -      |    kg/h    |    %    |    x    |    x     |
+|           |            |            |            |            |              |             |             |            |         |         |          |
+
+Tab. 1: Payload structure for _BK / BI - Bimetallic_, _MK / KAP - Membrane (capsule)_, _UNA / KU - Ball float_, _UIB / GLO - Inverted bucket_ and _Venturi_ steam traps
+
+For _DK / TH - Thermodynamic_ steam traps the payload structure is sligthly different. At byte position 8 (_Byte[8]_) a cycle counter value is beeing transmitted instead of a battery value.
+
+| Position  |  Byte[0]   |  Byte[1]   |  Byte[2]   |  Byte[3]   |   Byte[4]    |   Byte[5]   |   Byte[6]   |  Byte[7]   | Byte[8] | Byte[9] | Byte[10] |
+| :-------- | :--------: | :--------: | :--------: | :--------: | :----------: | :---------: | :---------: | :--------: | :-----: | :-----: | :------: |
+| Tag       | Avg. noise | Min. noise | Max. noise | Avg. temp. |  Amb. temp.  | Alarm flags | Error flags | Steam loss | Cycles  |    X    |    X     |
+| Data type |   UInt8    |   UInt8    |   UInt8    |   UInt8    |     Int8     |    UInt8    |    UInt8    |   UInt8    |  UInt8  |    x    |    x     |
+| Bitmask   |     -      |     -      |     -      |     -      |      -       |      -      |      -      |     -      |    -    |    x    |    x     |
+| Scaling   |    2.55    |    2.55    |    2.55    |     1      |      1       |      -      |      -      |     1      |    1    |    x    |    x     |
+| Offset    |     0      |     0      |     0      |     0      |      0       |      -      |      -      |     0      |    0    |    x    |    x     |
+| Range     |  0 - 100   |  0 - 100   |  0 - 100   |  0 - 250   | (-127) - 127 |      -      |      -      |  0 - 255   | 0 - 255 |    x    |    x     |
+| Unit      |     %      |     %      |     %      |     °C     |      °C      |      -      |      -      |    kg/h    |    -    |    x    |    x     |
+|           |            |            |            |            |              |             |             |            |         |         |          |
+
+Tab. 2: Payload structure for _DK / TH - Thermodynamic_ steam traps
+
 ### Alarm status flags - Byte[5]
 
-The alarm state shows the condition of the steam trap. If no bit is set high, the steam trap is working fine.
+The alarm state shows the condition of the steam trap. If no bit is set to 1, the steam trap is working fine and no alarms are active.
 
-| Position | Phrase            | Description                               |
-| :------: | :---------------- | :---------------------------------------- |
-|  Bit[0]  | TBD/RFU           | _To Be Defined / Reserved for future use_ |
-|  Bit[1]  | Cold warning      | Process / steam trap is not in operation  |
-|  Bit[2]  | BC warning        | Banking-up of condensate                  |
-|  Bit[3]  | Defective warning | Steam loss detected                       |
-|  Bit[4]  | TBD/RFU           | _To Be Defined / Reserved for future use_ |
-|  Bit[5]  | Cold alarm        | Process / steam trap is not in operation  |
-|  Bit[6]  | BC alarm          | Banking-up of condensate                  |
-|  Bit[7]  | Defective alarm   | Steam loss detected                       |
-|          |                   |                                           |
+| Position | Phrase               | Description                               |
+| :------: | :------------------- | :---------------------------------------- |
+|  Bit[0]  | Unconfigured warning | Device unconfigured, if bit is set to 1   |
+|  Bit[1]  | Cold warning         | Process / steam trap is not in operation  |
+|  Bit[2]  | BC warning           | Failed open / banking-up of condensate    |
+|  Bit[3]  | Defective warning    | Failed close / steam loss detected        |
+|  Bit[4]  | TBD/RFU              | _To Be Defined / Reserved for future use_ |
+|  Bit[5]  | Cold alarm           | Process / steam trap is not in operation  |
+|  Bit[6]  | BC alarm             | Failed open / banking-up of condensate    |
+|  Bit[7]  | Defective alarm      | Failed close / steam loss detected        |
+|          |                      |                                           |
 
-_Currently the warnings and alarms have been set to same thresholds except for the "Defective warning / alarm". So both flags (status bits) will be set HIGH or LOW at the same time (within the same payload uplink)._
+Tab. 3: List of alarm status flag bits packed in Byte[5]
 
 ### Error status flags - Byte[6]
 
-The error state shows the condition of the sensor equipment. If none Bit is set (except mode), the sensor is working fine.
+The error state shows the condition of the sensor equipment. If no bit is set to 1 (except _mode_ bits), the sensor is working fine.
 
 | Position | Phrase           | Description                                                    |
 | :------: | :--------------- | :------------------------------------------------------------- |
-|  Bit[0]  | TBD/RFU          | PT100 defective or pre-amplifier not connected (value < 0°C)   |
-|  Bit[1]  | PT100 max. error | PT100 defective or pre-amplifier not connected (value < 250°C) |
+|  Bit[0]  | PT100 min. error | PT100 defective or pre-amplifier not connected (value < 0°C)   |
+|  Bit[1]  | PT100 max. error | PT100 defective or pre-amplifier not connected (value > 250°C) |
 |  Bit[2]  | Amb. temp. error | Ambient temperature out of range [-20°C, 50°C]                 |
 |  Bit[3]  | Battery error    | Battery capacity < 9 % ($\approx$ 500 uplinks remaining)       |
 |  Bit[4]  | Battery warning  | Battery capacity < 46 % ($\approx$ 4500 uplinks remaining)     |
-|  Bit[5]  | Mode             | Bit[0] of working mode                                         |
-|  Bit[6]  | Mode             | Bit[1] of working mode                                         |
-|  Bit[7]  | Mode             | Bit[2] of working mode                                         |
+|  Bit[5]  | Mode             | Bit[0] of working mode (trap type index)                       |
+|  Bit[6]  | Mode             | Bit[1] of working mode (trap type index)                       |
+|  Bit[7]  | Mode             | Bit[2] of working mode (trap type index)                       |
 |          |                  |                                                                |
 
-Working modes are refering to the steam trap type / calibration type of the sensor.
+Tab. 4: List of error status flag bits packed in Byte[6]
+
+### Daily metadata uplinks on LoRa function port 3
+
+| Position  | Byte[0] | Byte[1] | Byte[2] | Byte[3] | Byte[4]  | Byte[5]  | Byte[6] | Byte[7] | Byte[8] | Byte[9] |   Byte[10]    |
+| :-------- | :-----: | :-----: | :-----: | :-----: | :------: | :------: | :-----: | :-----: | :-----: | :-----: | :-----------: |
+| Tag       |   SWV   |   BAT   | ThCold  |  ThBC   | ThDefMin | ThDefAvg |  SLTh0  | SLVal0  |  SLTh2  | SLVal2  | TV_minmin_Val |
+| Data type |  Uint8  |  Uint8  |  Uint8  |  Uint8  |  Uint8   |  Uint8   |  Uint8  |  Uint8  |  Uint8  |  Uint8  |     Uint8     |
+| Bitmask   |    -    |    -    |    -    |    -    |    -     |    -     |    -    |    -    |    -    |    -    |       -       |
+| Scaling   |    1    |  2.54   |    1    |    1    |    1     |    1     |    1    |    1    |    1    |    1    |       1       |
+| Offset    |    0    |    0    |    0    |    0    |    0     |    0     |    0    |    0    |    0    |    0    |       0       |
+| Range     | 0 - 255 | 0 - 100 | 0 - 255 | 0 - 255 | 0 - 255  | 0 - 255  | 0 - 255 | 0 - 255 | 0 - 255 | 0 - 255 |    0 - 255    |
+| Unit      |    -    |    %    |    -    |    -    |    -     |    -     |    -    |    -    |    -    |    -    |       -       |
+|           |         |         |         |         |          |          |         |         |         |         |               |
+
+Tab. 5: Daily metadata uplinks on LoRa function port 3 (only for SWV >= 1.1.0)
+
+## Additional information
+
+### Working modes / steam trap types
+
+**Working modes 0-2 are supported by all software versions**  
+**Working modes 2-5 and the daily metadata uplink on port 3 is only available in SWV >= 1.1.0**
 
 | Value | Phrase    | Description         |
 | :---: | :-------- | :------------------ |
@@ -52,52 +131,29 @@ Working modes are refering to the steam trap type / calibration type of the sens
 |   2   | UNA / KU  | Ball float          |
 |   3   | UIB / GLO | Inverted bucket     |
 |   4   | DK / TH   | Thermodynamic       |
-|       |           |                     |
+|   5   | Venturi   | Venturi             |
 
-_DK / TH is not supported yet, see ["Announcements" section](#announcements)_
+Tab. 6: List of supported steam trap types
 
-### Data frames / payload uplinks
+### Mounting options
 
-**All payload encodings are big-endian byteorder with LSB arangement (least significant bit first).**
+| Value | Phrase | Description                                           |
+| :---: | :----- | :---------------------------------------------------- |
+|   0   | PBS    | PBS - vertical pressure bearing screw                 |
+|   1   | ADP    | ADP - horizontal pressure bearing screw (90° adapter) |
+|   2   | RFC    | RFC - retro fit clamp                                 |
 
-The scaling and offset is beeing applied as $fx = \frac{x - offset}{scale}$
+Tab. 7: List of supported mounting options
 
-### **bimetallic**, **membrane** / **capsule** and **ball float** steam traps
+### Subscriptions
 
-| Position  |  Byte[0]   |  Byte[1]   |  Byte[2]   |  Byte[3]   |   Byte[4]    |   Byte[5]   |   Byte[6]   |  Byte[7]   | Byte[8] | Byte[9] | Byte[10] |
-| :-------- | :--------: | :--------: | :--------: | :--------: | :----------: | :---------: | :---------: | :--------: | :-----: | :-----: | :------: |
-| Tag       | Avg. noise | Min. noise | Max. noise | Avg. temp. |  Amb. temp.  | Alarm flags | Error flags | Steam loss | Battery |    X    |    X     |
-| Data type |   UInt8    |   UInt8    |   UInt8    |   UInt8    |     Int8     |    UInt8    |    UInt8    |   UInt8    |  UInt8  |    x    |    x     |
-| Bitmask   |     -      |     -      |     -      |     -      |      -       |      -      |      -      |     -      |    -    |    x    |    x     |
-| Scaling   |    2.55    |    2.55    |    2.55    |     1      |      1       |      -      |      -      |     10     |  2.54   |    x    |    x     |
-| Offset    |     0      |     0      |     0      |     0      |      0       |      -      |      -      |     0      |    0    |    x    |    x     |
-| Range     |  0 - 100   |  0 - 100   |  0 - 100   |  0 - 250   | (-127) - 127 |      -      |      -      |  0 - 25.5  | 0 - 100 |    x    |    x     |
-| Unit      |     %      |     %      |     %      |     °C     |      °C      |      -      |      -      |    kg/h    |    %    |    x    |    x     |
-|           |            |            |            |            |              |             |             |            |         |         |          |
+Lower table shows data tag availability for different subscription plans.
 
-_Fields filled with **X** are masked / censored._
+| Position | Masked / Total |  Byte[0]   |  Byte[1]   |  Byte[2]   |  Byte[3]   |  Byte[4]   |   Byte[5]   |   Byte[6]   |  Byte[7]   | Byte[8] | Byte[9] | Byte[10] |
+| :------- | :------------: | :--------: | :--------: | :--------: | :--------: | :--------: | :---------: | :---------: | :--------: | :-----: | :-----: | :------: |
+| Tag      |                | Avg. noise | Min. noise | Max. noise | Avg. temp. | Amb. temp. | Alarm flags | Error flags | Steam loss | Cycles  |    X    |    X     |
+| Bronze   |     8 / 11     |     ✘      |     ✘      |     ✘      |     ✘      |     ✘      |      ✔      |      ✔      |     ✘      |    ✔    |    ✘    |    ✘     |
+| Silver   |     3 / 11     |     ✔      |     ✔      |     ✔      |     ✔      |     ✔      |      ✔      |      ✔      |     ✘      |    ✔    |    ✘    |    ✘     |
+| Gold     |     2 / 11     |     ✔      |     ✔      |     ✔      |     ✔      |     ✔      |      ✔      |      ✔      |     ✔      |    ✔    |    ✘    |    ✘     |
 
-### **thermo-dynamic** steam traps
-
-_Not available yet._
-
-## Compability of hardware (amplifier) and software versions
-
-Currently there is only the initial software release v1.0.0 available. An software release update is expected in the first quarter of 2024. See expected new features and improvements in ["Announcements" section](#new-software-release-110-expected-in-february-2024).
-
-| Software | Hardware   |
-| :------- | :--------- |
-| v1.0.0   | 1.0 \| 1.2 |
-| v1.1.0   | 1.0 \| 1.2 |
-
-## Announcements
-
-### New software release 1.1.0 expected in February 2024
-
-The software update will include
-
-- Logic for thermo-dynamic steam traps
-- Encryption for distributors
-- Dynamic measurement time
-- Steam leakage update
-- Easier and more robust configuration process through compressed downlinks
+Tab. 8: Subscription data tag availability
