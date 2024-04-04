@@ -1,6 +1,6 @@
 # Multisense Bolt 1 / Ecobolt 1 Decoders
 
-This repository contains payload decoder for _The Things Network (TTN)_ / _The Things Industries (TTI)_.  
+The _ecoBolt_ is acontinuous steam trap monitor and this repository contains payload decoder for the _The Things Network (TTN)_ / _The Things Industries (TTI)_ industrial internet of things (IIoT) platform.
 The official decoder format documentation can be reviewed at [thethingsindustries.com](https://www.thethingsindustries.com/docs/integrations/payload-formatters/javascript/uplink/).
 
 ## Get started
@@ -36,17 +36,17 @@ This subsection shows the whole payload structure and differences between differ
 
 ### Data uplink on LoRa function port 2
 
-_Fields filled with **X** are masked._
+_Fields filled with **✘** are masked._
 
 | Position  |  Byte[0]   |  Byte[1]   |  Byte[2]   |  Byte[3]   |   Byte[4]    |   Byte[5]   |   Byte[6]   |  Byte[7]   | Byte[8] | Byte[9] | Byte[10] |
 | :-------- | :--------: | :--------: | :--------: | :--------: | :----------: | :---------: | :---------: | :--------: | :-----: | :-----: | :------: |
-| Tag       | Avg. noise | Min. noise | Max. noise | Avg. temp. |  Amb. temp.  | Alarm flags | Error flags | Steam loss | Battery |    X    |    X     |
-| Data type |   UInt8    |   UInt8    |   UInt8    |   UInt8    |     Int8     |    UInt8    |    UInt8    |   UInt8    |  UInt8  |    x    |    x     |
-| Bitmask   |     -      |     -      |     -      |     -      |      -       |      -      |      -      |     -      |    -    |    x    |    x     |
-| Scaling   |    2.55    |    2.55    |    2.55    |     1      |      1       |      -      |      -      |     1      |  2.54   |    x    |    x     |
-| Offset    |     0      |     0      |     0      |     0      |      0       |      -      |      -      |     0      |    0    |    x    |    x     |
-| Range     |  0 - 100   |  0 - 100   |  0 - 100   |  0 - 250   | (-127) - 127 |      -      |      -      |  0 - 25.5  | 0 - 100 |    x    |    x     |
-| Unit      |     %      |     %      |     %      |     °C     |      °C      |      -      |      -      |    kg/h    |    %    |    x    |    x     |
+| Tag       | Avg. noise | Min. noise | Max. noise | Avg. temp. |  Amb. temp.  | Alarm flags | Error flags | Steam loss | Battery |    ✘    |    ✘     |
+| Data type |   UInt8    |   UInt8    |   UInt8    |   UInt8    |     Int8     |    UInt8    |    UInt8    |   UInt8    |  UInt8  |    ✗    |    ✗     |
+| Bitmask   |     -      |     -      |     -      |     -      |      -       |      -      |      -      |     -      |    -    |    ✗    |    ✗     |
+| Scaling   |    2.55    |    2.55    |    2.55    |     1      |      1       |      -      |      -      |     1      |  2.54   |    ✗    |    ✗     |
+| Offset    |     0      |     0      |     0      |     0      |      0       |      -      |      -      |     0      |    0    |    ✗    |    ✗     |
+| Range     |  0 - 100   |  0 - 100   |  0 - 100   |  0 - 250   | (-127) - 127 |      -      |      -      |  0 - 25.5  | 0 - 100 |    ✗    |    ✗     |
+| Unit      |     %      |     %      |     %      |     °C     |      °C      |      -      |      -      |    kg/h    |    %    |    ✗    |    ✗     |
 |           |            |            |            |            |              |             |             |            |         |         |          |
 
 Tab. 1: Payload structure for _BK / BI - Bimetallic_, _MK / KAP - Membrane (capsule)_, _UNA / KU - Ball float_, _UIB / GLO - Inverted bucket_ and _Venturi_ steam traps
@@ -55,13 +55,13 @@ For _DK / TH - Thermodynamic_ steam traps the payload structure is sligthly diff
 
 | Position  |  Byte[0]   |  Byte[1]   |  Byte[2]   |  Byte[3]   |   Byte[4]    |   Byte[5]   |   Byte[6]   |  Byte[7]   | Byte[8] | Byte[9] | Byte[10] |
 | :-------- | :--------: | :--------: | :--------: | :--------: | :----------: | :---------: | :---------: | :--------: | :-----: | :-----: | :------: |
-| Tag       | Avg. noise | Min. noise | Max. noise | Avg. temp. |  Amb. temp.  | Alarm flags | Error flags | Steam loss | Cycles  |    X    |    X     |
-| Data type |   UInt8    |   UInt8    |   UInt8    |   UInt8    |     Int8     |    UInt8    |    UInt8    |   UInt8    |  UInt8  |    x    |    x     |
-| Bitmask   |     -      |     -      |     -      |     -      |      -       |      -      |      -      |     -      |    -    |    x    |    x     |
-| Scaling   |    2.55    |    2.55    |    2.55    |     1      |      1       |      -      |      -      |     1      |    1    |    x    |    x     |
-| Offset    |     0      |     0      |     0      |     0      |      0       |      -      |      -      |     0      |    0    |    x    |    x     |
-| Range     |  0 - 100   |  0 - 100   |  0 - 100   |  0 - 250   | (-127) - 127 |      -      |      -      |  0 - 255   | 0 - 255 |    x    |    x     |
-| Unit      |     %      |     %      |     %      |     °C     |      °C      |      -      |      -      |    kg/h    |    -    |    x    |    x     |
+| Tag       | Avg. noise | Min. noise | Max. noise | Avg. temp. |  Amb. temp.  | Alarm flags | Error flags | Steam loss | Cycles  |    ✘    |    ✘     |
+| Data type |   UInt8    |   UInt8    |   UInt8    |   UInt8    |     Int8     |    UInt8    |    UInt8    |   UInt8    |  UInt8  |    ✗    |    ✗     |
+| Bitmask   |     -      |     -      |     -      |     -      |      -       |      -      |      -      |     -      |    -    |    ✗    |    ✗     |
+| Scaling   |    2.55    |    2.55    |    2.55    |     1      |      1       |      -      |      -      |     1      |    1    |    ✗    |    ✗     |
+| Offset    |     0      |     0      |     0      |     0      |      0       |      -      |      -      |     0      |    0    |    ✗    |    ✗     |
+| Range     |  0 - 100   |  0 - 100   |  0 - 100   |  0 - 250   | (-127) - 127 |      -      |      -      |  0 - 255   | 0 - 255 |    ✗    |    ✗     |
+| Unit      |     %      |     %      |     %      |     °C     |      °C      |      -      |      -      |    kg/h    |    -    |    ✗    |    ✗     |
 |           |            |            |            |            |              |             |             |            |         |         |          |
 
 Tab. 2: Payload structure for _DK / TH - Thermodynamic_ steam traps
@@ -151,9 +151,9 @@ Lower table shows data tag availability for different subscription plans.
 
 | Position | Masked / Total |  Byte[0]   |  Byte[1]   |  Byte[2]   |  Byte[3]   |  Byte[4]   |   Byte[5]   |   Byte[6]   |  Byte[7]   | Byte[8] | Byte[9] | Byte[10] |
 | :------- | :------------: | :--------: | :--------: | :--------: | :--------: | :--------: | :---------: | :---------: | :--------: | :-----: | :-----: | :------: |
-| Tag      |                | Avg. noise | Min. noise | Max. noise | Avg. temp. | Amb. temp. | Alarm flags | Error flags | Steam loss | Cycles  |    X    |    X     |
-| Bronze   |     8 / 11     |     ✘      |     ✘      |     ✘      |     ✘      |     ✘      |      ✔      |      ✔      |     ✘      |    ✔    |    ✘    |    ✘     |
-| Silver   |     3 / 11     |     ✔      |     ✔      |     ✔      |     ✔      |     ✔      |      ✔      |      ✔      |     ✘      |    ✔    |    ✘    |    ✘     |
-| Gold     |     2 / 11     |     ✔      |     ✔      |     ✔      |     ✔      |     ✔      |      ✔      |      ✔      |     ✔      |    ✔    |    ✘    |    ✘     |
+| Tag      |                | Avg. noise | Min. noise | Max. noise | Avg. temp. | Amb. temp. | Alarm flags | Error flags | Steam loss | Cycles  |    ✘    |    ✘     |
+| Bronze   |     8 / 11     |     ❌     |     ❌     |     ❌     |     ❌     |     ❌     |     ✔️      |     ✔️      |     ❌     |   ✔️    |   ❌    |    ❌    |
+| Silver   |     3 / 11     |     ✔️     |     ✔️     |     ✔️     |     ✔️     |     ✔️     |     ✔️      |     ✔️      |     ❌     |   ✔️    |   ❌    |    ❌    |
+| Gold     |     2 / 11     |     ✔️     |     ✔️     |     ✔️     |     ✔️     |     ✔️     |     ✔️      |     ✔️      |     ✔️     |   ✔️    |   ❌    |    ❌    |
 
 Tab. 8: Subscription data tag availability
