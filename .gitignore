@@ -1,9 +1,8 @@
 
-# os related
+# os & swap files related
+~$*
 *.swp
 .DS_Store
 
-# virtual envs
+# virtual envs / package directories
 node_modules
-venv*
-*venv
