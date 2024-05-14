@@ -1,8 +1,24 @@
 {
   "name": "msb-1-decoders",
-  "version": "1.0.0",
-  "private": false,
+  "description": "MSB-1 (Multisense Bolt 1) / Ecobolt-1 Decoder",
+  "version": "1.1.0",
   "license": "MIT",
-  "description": "MSB-1 (Multisense Bolt 1) / Ecobolt-1 Decoders",
-  "repository": "git@github.com:GESTRA-AG/msb-1-decoders.git"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/GESTRA-AG/msb-1-config-downlinks"
+  },
+  "bugs": {
+    "url": "https://github.com/GESTRA-AG/msb-1-config-downlinks/issues",
+    "email": "ConnectedServices@gestra.com"
+  },
+  "homepage": "https://www.gestra.com/global/en-GES/products/steam-traps/ecobolt-wireless-steam-trap-monitoring",
+  "packageManager": "yarn@4.2.2",
+  "main": "./TypeScript/decoder.ts",
+  "scripts": {
+    "format": "prettier --write .",
+    "build": "tsc && yarn format"
+  },
+  "devDependencies": {
+    "prettier": "^3.2.5"
+  }
 }
