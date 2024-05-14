@@ -7,6 +7,7 @@ const trapType: TrapType = "BK / BI - Bimetallic";
 const softwareVersion: SoftwateVersion = "1.1.0";
 const subscription: Subscription = "Bronze";
 const filterMaskedData: boolean = true;
+const warnOnCustomPorts: boolean = true;
 
 // ! End of Decoder Setup ------------------------------------------------------
 
@@ -28,19 +29,29 @@ type Subscription = (typeof subscriptions)[number];
 const softwareVersions = ["1.0.0", "1.1.0"] as const;
 type SoftwateVersion = (typeof softwareVersions)[number];
 
-const maskedDataIndicies = {
-  None: [] as number[],
-  Bronze: [0, 1, 2, 3, 4, 7, 9, 10], // only state alarms & errors + battery are unmasked
-  Silver: [7, 9, 10], // everything except steam loss and counters
-  Gold: [9, 10], // everything except counters
-};
+const maskedDataTags = {
+  None: [] as string[],
+  Bronze: [
+    "noise_avg",
+    "noise_min",
+    "noise_max",
+    "pt100",
+    "internal_temp",
+    // ... status + ststatus
+    "steam_loss",
+    // ... cycles / BAT
+    "cntByte1",
+    "cntByte2",
+  ], // only state alarms & errors + battery are unmasked
+  Silver: ["steam_loss", "cntByte1", "cntByte2"], // everything except steam loss and counters
+  Gold: ["cntByte1", "cntByte2"], // everything except counters
+} as const;
 
-interface InputData {
-  bytes: Uint8Array;
-  fport: number;
+interface Input {
+  bytes: number[];
+  fPort: number;
 }
-
-interface OutputData {
+interface Output {
   data: Tags;
   warnings: string[];
   errors: string[];
@@ -60,9 +71,11 @@ interface Tags {
   cycles?: number;
   BAT?: number;
   ststatus?: number;
-  counter?: number;
+  cntByte1?: number;
+  cntByte2?: number;
   // custom responses to specific downlinks
   ack?: number;
+  cfg_flags?: number;
   SWV?: number;
   // additional tags
   rawData?: string;
@@ -71,94 +84,131 @@ interface Tags {
 // * Main decoder function -----------------------------------------------------
 
 // init vars
-let data: Tags;
-let warnings: string[] = [];
-let errors: string[] = [];
+const data: Tags = {};
+const warnings: string[] = [];
+const errors: string[] = [];
 
 /**
  * Decode LoRa uplink payload of MSB-1 (Multisense Bolt 1 / Ecobolt 1).
  *
- * @param {InputData} input - Object with 'bytes' as Uint8Array and 'fport' number.
- * @returns {OutputData} - JSON record with 'data', 'warnings' and 'errors'.
+ * @param {{bytes: number[], fPort: number}} input - Object with 'bytes' as number[] and 'fPort' as number.
+ * @returns {{data: {[key: string]: number}, warnings: string[], errors: string[]}} - JSON object.
  */
-function decodeUplink(input: InputData): OutputData {
-  const dataView = new DataView(input.bytes.buffer);
+function decodeUplink(input: Input): Output {
+  const bytes = new Uint8Array(input.bytes);
+  const dataView = new DataView(bytes.buffer);
   const littleEndian = false; // MSB-1 uses big-endian byte order
-  switch (input.fport) {
+  switch (input.fPort) {
     case 2: {
+      // * Telemetry data uplinks
       data.noise_avg = dataView.getUint8(0);
       data.noise_min = dataView.getUint8(1);
       data.noise_max = dataView.getUint8(2);
       data.pt100 = dataView.getUint8(3);
       data.internal_temp = dataView.getUint8(4);
       data.status = dataView.getUint16(5, littleEndian);
+      data.ststatus = getSteamTrapStatus(dataView.getUint16(5, littleEndian));
       data.steam_loss = dataView.getUint8(7);
       trapType == "DK / TH - Thermodynamic"
         ? (data.cycles = dataView.getUint8(8))
         : (data.BAT = dataView.getUint8(8));
-      data.ststatus = getSteamTrapStatus(dataView.getUint16(5, littleEndian));
+      data.cntByte1 = dataView.getUint8(9);
+      data.cntByte2 = dataView.getUint8(10);
       break;
     }
+    case 3: {
+      // * Daily metadata uplinks (SWV >= 1.1.0)
+      data.SWV = dataView.getUint8(0);
+      data.BAT = dataView.getUint8(1);
+      data.rawData = uint8ArrayToHex(bytes);
+    }
     case 10: {
-      warnings.push("LoRa node rebooted");
+      // * Dragino specific uplinks
+      if (warnOnCustomPorts) {
+        warnings.push("LoRa node rebooted");
+      }
       data.ATZ = dataView.getUint16(0, littleEndian);
       break;
     }
     case 134: {
-      // * counter thresholds uplink
-      data.rawData = uint8ArrayToHex(input.bytes);
+      // * Counter thresholds uplinks
+      if (warnOnCustomPorts) {
+        warnings.push(`Received config thresholds uplink`);
+      }
+      data.rawData = uint8ArrayToHex(bytes);
       break;
     }
     case 139: {
-      // * software version uplink
+      // * Software version uplinks
+      if (warnOnCustomPorts) {
+        warnings.push("Received software version uplink");
+      }
       data.SWV = Number.parseInt(
-        "" + dataView.getUint8(1) + dataView.getUint8(0) + dataView.getUint8(2),
-        10
+        "" +
+          dataView.getUint8(1) +
+          dataView.getUint8(0) +
+          dataView.getUint8(2),
+        10,
       );
       break;
     }
     case 142: {
-      // * sensor calibration values uplink
-      data.rawData = uint8ArrayToHex(input.bytes);
+      // * Sensor calibration values uplinks
+      if (warnOnCustomPorts) {
+        warnings.push("Received sensor calibration values uplink");
+      }
+      data.rawData = uint8ArrayToHex(bytes);
       break;
     }
     case 144:
     case 145:
     case 146: {
-      // * ack bytes
+      // * Ack bytes
       data.ack = dataView.getUint8(0);
       break;
     }
     case 148: {
-      // * alarm thresholds uplink
-      data.rawData = uint8ArrayToHex(input.bytes);
+      // * Alarm thresholds uplinks
+      if (warnOnCustomPorts) {
+        warnings.push("Received alarm thresholds uplink");
+      }
+      data.rawData = uint8ArrayToHex(bytes);
       break;
     }
     case 149: {
-      // * DK / TH - Thermodynamic steam trap configuration values uplink
-      data.rawData = uint8ArrayToHex(input.bytes);
+      // * DK / TH - Thermodynamic steam trap configuration values uplinks
+      if (warnOnCustomPorts) {
+        warnings.push("Received DK/TH steam trap type specific uplink");
+      }
+      data.rawData = uint8ArrayToHex(bytes);
       break;
+    }
+    case 152: {
+      // * Configuration bit flags uplinks
+      if (warnOnCustomPorts) {
+        warnings.push("Received flags of config thresholds uplink");
+      }
+      data.rawData = uint8ArrayToHex(bytes);
     }
     default: {
       errors.push(
-        `Received payload on unexpected LoRa function port ${input.fport}`
+        `Received payload on unexpected LoRa function port ${input.fPort}`,
       );
-      data.rawData = uint8ArrayToHex(input.bytes);
+      data.rawData = uint8ArrayToHex(bytes);
       break;
     }
   }
   // post-process data before return
   if (
     filterMaskedData &&
-    input.fport === 2 &&
+    input.fPort === 2 &&
     softwareVersion !== "1.0.0" &&
     subscription !== "None"
   ) {
-    const maskedIndicies = maskedDataIndicies[subscription];
-    for (const index of maskedIndicies) {
-      const key = Object.keys(data)[index];
-      delete data[key as keyof Tags];
-    }
+    const maskedTags = maskedDataTags[subscription];
+    maskedTags.forEach((tag) => {
+      delete data[tag];
+    });
   }
   // return data
   return {
@@ -218,7 +268,7 @@ function getSteamTrapStatus(status: number): number {
     return 0; // undefined
   }
   const matchedStatus = Object.keys(statusBitPos).find(
-    (key) => status & (1 << statusBitPos[key as StatusKeys])
+    (key) => status & (1 << statusBitPos[key as StatusKeys]),
   );
   return matchedStatus ? statusOutVal[matchedStatus as StatusKeys] : 1; // ok
 }
@@ -230,12 +280,13 @@ function getSteamTrapStatus(status: number): number {
  * @param {number} value - Number value with base 10 to be converted.
  * @param {number} digits - Number of digits to pad the hex string with zeros.
  * @param {boolean} bytereverse - Reverse the byte order of the hex string.
+ *
  * @returns {string} Zero padded hex string representative of the number value.
  */
 function toHex(
   value: number,
   digits: number,
-  bytereverse: boolean = false
+  bytereverse: boolean = false,
 ): string {
   let hexstr = value.toString(16);
   if (bytereverse) {
@@ -254,10 +305,10 @@ function toHex(
 /**
  * Convert whole Uint8Array to hex string representative of the array values.
  *
- * @param {number} array - Uint8Array to be converted to hex string.
+ * @param {number[]} array - Uint8Array to be converted to hex string.
  * @returns {string} Hex string representative of the array values.
  */
-function uint8ArrayToHex(array: Uint8Array): string {
+function uint8ArrayToHex(array: Uint8Array | number[]): string {
   let hexstr = "";
   for (let i = 0; i < array.length; i++) {
     hexstr += toHex(array[i], 2);

@@ -1,0 +1,7 @@
+{
+  "recommendations": [
+    "esbenp.prettier-vscode",
+    "aaronbond.better-comments",
+    "junhan.code-runner"
+  ]
+}
