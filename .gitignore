@@ -4,5 +4,8 @@
 *.swp
 .DS_Store
 
-# virtual envs / package directories
+# env related
+.yarn/*
+yarn-error.log
 node_modules
+.pnp.*

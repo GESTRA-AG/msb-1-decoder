@@ -1,4 +1,4 @@
-# Multisense Bolt 1 / Ecobolt 1 Decoders
+# Multisense Bolt 1 / Ecobolt 1 Decoder
 
 The _ecoBolt_ is acontinuous steam trap monitor and this repository contains payload decoder for the _The Things Network (TTN)_ / _The Things Industries (TTI)_ industrial internet of things (IIoT) platform.
 The official decoder format documentation can be reviewed at [thethingsindustries.com](https://www.thethingsindustries.com/docs/integrations/payload-formatters/javascript/uplink/).
@@ -14,6 +14,7 @@ const trapType = "BK / BI - Bimetallic";
 const softwareVersion = "1.1.0";
 const subscription = "Bronze";
 const filterMaskedData = true;
+const warnOnCustomPorts = true;
 
 // ! End of Decoder Setup ------------------------------------------------------
 ```
