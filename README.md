@@ -118,6 +118,20 @@ Tab. 4: List of error status flag bits packed in Byte[6]
 
 Tab. 5: Daily metadata uplinks on LoRa function port 3 (only for SWV >= 1.1.0)
 
+### SteamTrapStatus (ststatus)
+To simplify the status of the steam trap in one status / datapoint alarm and error status (Byte 5 & Byte 6) are merged in the decoder to one value which consists of the following:
+| Priority | meaning                            | ststatus_value |
+| :------: | :--------------------------------: | :------------: |
+|    1     | Byte[6], Bit[0] - PT100 min. error | 9              |
+|    1     | Byte[6], Bit[1] - PT100 max. error | 8              |
+|    3     | Byte[6], Bit[3] - Battery error    | 6              |
+|    5     | Byte[5], Bit[7] - Defective Alarm  | 2              |
+|    6     | Byte[5], Bit[6] - BC alarm         | 3              |
+|    6     | Byte[5], Bit[5] - Cold alarm       | 4              |
+|    7     | ok                                 | 1              |
+
+Tab. 6: ststatus
+
 ## Additional information
 
 ### Working modes / steam trap types
@@ -134,7 +148,7 @@ Tab. 5: Daily metadata uplinks on LoRa function port 3 (only for SWV >= 1.1.0)
 |   4   | DK / TH   | Thermodynamic       |
 |   5   | Venturi   | Venturi             |
 
-Tab. 6: List of supported steam trap types
+Tab. 7: List of supported steam trap types
 
 ### Mounting options
 
@@ -144,7 +158,7 @@ Tab. 6: List of supported steam trap types
 |   1   | ADP    | ADP - horizontal pressure bearing screw (90° adapter) |
 |   2   | RFC    | RFC - retro fit clamp                                 |
 
-Tab. 7: List of supported mounting options
+Tab. 8: List of supported mounting options
 
 ### Subscriptions
 
@@ -157,4 +171,4 @@ Lower table shows data tag availability for different subscription plans.
 | Silver   |     3 / 11     |     ✔️     |     ✔️     |     ✔️     |     ✔️     |     ✔️     |     ✔️      |     ✔️      |     ❌     |   ✔️    |   ❌    |    ❌    |
 | Gold     |     2 / 11     |     ✔️     |     ✔️     |     ✔️     |     ✔️     |     ✔️     |     ✔️      |     ✔️      |     ✔️     |   ✔️    |   ❌    |    ❌    |
 
-Tab. 8: Subscription data tag availability
+Tab. 9: Subscription data tag availability
