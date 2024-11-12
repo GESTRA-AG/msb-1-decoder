@@ -120,17 +120,17 @@ Tab. 5: Daily metadata uplinks on LoRa function port 3 (only for SWV >= 1.1.0)
 
 ### SteamTrapStatus (ststatus)
 To simplify the status of the steam trap in one status / datapoint alarm and error status (Byte 5 & Byte 6) are merged in the decoder to one value which consists of the following:
-| Priority | meaning                            | ststatus_value |
-| :------: | :--------------------------------: | :------------: |
-|    1     | Byte[6], Bit[0] - PT100 min. error | 9              |
-|    1     | Byte[6], Bit[1] - PT100 max. error | 8              |
-|    3     | Byte[6], Bit[3] - Battery error    | 6              |
-|    5     | Byte[5], Bit[7] - Defective Alarm  | 2              |
-|    6     | Byte[5], Bit[6] - BC alarm         | 3              |
-|    6     | Byte[5], Bit[5] - Cold alarm       | 4              |
-|    7     | ok                                 | 1              |
+| Priority | Position | Description                            | *ststatus* value |
+| :------: | :---------| :----------------------- | :------------: |
+|    1     | Byte[6], Bit[0] | PT100 min. error | 9              |
+|    1     | Byte[6], Bit[1] | PT100 max. error | 8              |
+|    3     | Byte[6], Bit[3] | Battery error    | 6              |
+|    5     | Byte[5], Bit[7] | Defective Alarm  | 2              |
+|    6     | Byte[5], Bit[6] | BC alarm         | 3              |
+|    6     | Byte[5], Bit[5] | Cold alarm       | 4              |
+|    7     | |Ok                                 | 1              |
 
-Tab. 6: ststatus
+Tab. 6: *ststatus* telemetry tag
 
 ## Additional information
 
